@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد مدیریت تردد و اطلاعات کار</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+:root {
+  --bg: #121212;
+  --panel: #1e1e1e;
+  --panel-2: #252526;
+  --border: #333;
+  --text: #e8e8e8;
+  --muted: #9e9e9e;
+  --blue: #2196f3;
+  --blue-dark: #1565c0;
+  --green: #4caf50;
+  --green-dark: #2e7d32;
+  --orange: #ff9800;
+  --orange-dark: #e65100;
+  --red: #f44336;
+  --red-dark: #b71c1c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: Vazirmatn, Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.container { max-width: 1280px; margin: 0 auto; padding: 16px; }
+
+header {
+  background: linear-gradient(135deg, #1a237e 0%, #0d47a1 60%, #01579b 100%);
+  border-radius: 12px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+}
+
+.header-title { display: flex; flex-direction: column; gap: 4px; }
+.header-title h1 { font-size: 1.15rem; font-weight: 800; }
+.header-title span { font-size: .75rem; color: #bbdefb; }
+
+.header-info { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.clock-box { text-align: center; }
+.clock-box .time { font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #80d8ff; direction: ltr; }
+.clock-box .date { font-size: .8rem; color: #e3f2fd; }
+.user-chip {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-size: .8rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.user-chip .dot { width: 9px; height: 9px; border-radius: 50%; background: #69f0ae; }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: filter .15s, transform .1s;
+}
+.btn:hover { filter: brightness(1.15); }
+.btn:active { transform: scale(.97); }
+.btn-blue { background: var(--blue-dark); }
+.btn-green { background: var(--green-dark); }
+.btn-orange { background: var(--orange-dark); }
+.btn-red { background: var(--red-dark); }
+.btn-gray { background: #37474f; }
+.btn-sm { padding: 5px 10px; font-size: .75rem; border-radius: 6px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.stat-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.stat-card .num { font-size: 1.6rem; font-weight: 800; }
+.stat-card .label { font-size: .78rem; color: var(--muted); }
+.icon-total { background: rgba(33,150,243,.15); color: var(--blue); }
+.icon-present { background: rgba(76,175,80,.15); color: var(--green); }
+.icon-absent { background: rgba(244,67,54,.15); color: var(--red); }
+.icon-late { background: rgba(255,152,0,.15); color: var(--orange); }
+
+.main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.card-header h2 { font-size: .95rem; font-weight: 700; }
+
+.cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-nav button {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  width: 30px; height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.cal-nav button:hover { background: var(--blue-dark); }
+.cal-nav .cal-title { font-size: .85rem; font-weight: 700; min-width: 110px; text-align: center; }
+
+.calendar { padding: 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-weekday { text-align: center; font-size: .7rem; color: var(--muted); padding: 6px 0; font-weight: 700; }
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: .8rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.cal-day:hover { background: var(--panel-2); }
+.cal-day.empty { visibility: hidden; }
+.cal-day.today { background: var(--blue-dark); color: #fff; font-weight: 800; box-shadow: 0 0 0 2px var(--blue); }
+.cal-day.selected { border-color: var(--green); color: #a5d6a7; }
+.cal-day.friday { color: #ef9a9a; }
+
+.search-box { position: relative; }
+.search-box input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  padding: 8px 34px 8px 12px;
+  font-size: .8rem;
+  width: 220px;
+}
+.search-box input:focus { outline: none; border-color: var(--blue); }
+.search-box::before { content: '🔍'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: .8rem; opacity: .6; }
+
+table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+thead th {
+  background: var(--panel-2);
+  padding: 11px 12px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td { padding: 10px 12px; border-bottom: 1px solid #2a2a2a; white-space: nowrap; }
+tbody tr:hover { background: #232323; }
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .75rem;
+  font-weight: 700;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.badge { padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700; display: inline-block; }
+.badge-present { background: rgba(76,175,80,.15); color: #81c784; border: 1px solid rgba(76,175,80,.4); }
+.badge-absent { background: rgba(244,67,54,.15); color: #e57373; border: 1px solid rgba(244,67,54,.4); }
+.badge-late { background: rgba(255,152,0,.15); color: #ffb74d; border: 1px solid rgba(255,152,0,.4); }
+.badge-leave { background: rgba(33,150,243,.15); color: #64b5f6; border: 1px solid rgba(33,150,243,.4); }
+.empty-row td { text-align: center; color: var(--muted); padding: 28px; }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.overlay.active { display: flex; }
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6);
+}
+.modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+  border-radius: 14px 14px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h3 { font-size: .95rem; }
+.modal-close { background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; }
+.modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.field label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 6px; }
+.field input, .field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  padding: 9px 12px;
+  font-size: .85rem;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--blue); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-start; gap: 8px; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 50%;
+  transform: translateX(50%) translateY(80px);
+  background: var(--green-dark);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 30px;
+  font-size: .82rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: all .3s;
+  z-index: 200;
+  box-shadow: 0 4px 14px rgba(0,0,0,.5);
+}
+.toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
+.toast.error { background: var(--red-dark); }
+
+@media print {
+  body { background: #fff; color: #000; }
+  .toolbar, header .clock-box, header .user-chip, .card.cal-card, .btn, .overlay, .toast { display: none !important; }
+  .card, .stat-card { border-color: #999; background: #fff; }
+  header { background: #fff !important; color: #000; box-shadow: none; }
+  header .header-title span { color: #555; }
+  thead th { background: #eee; color: #000; }
+  tbody td { border-color: #ccc; }
+  .main-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-title">
+      <h1>📊 داشبورد مدیریت تردد و اطلاعات کار</h1>
+      <span>Rahkaran Attendance Portable v4.0 — HTML</span>
+    </div>
+    <div class="header-info">
+      <div class="clock-box">
+        <div class="time" id="clockTime">--:--:--</div>
+        <div class="date" id="clockDate">...</div>
+      </div>
+      <div class="user-chip"><span class="dot"></span><span id="userName">کاربر تستی</span></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn btn-green" onclick="openModal()">➕ ورود دستی</button>
+    <button class="btn btn-blue" onclick="document.getElementById('excelInput').click()">📥 ورود اکسل</button>
+    <input type="file" id="excelInput" accept=".csv,text/csv" style="display:none" onchange="importCSV(this)">
+    <button class="btn btn-blue" onclick="exportCSV()">📤 خروجی اکسل</button>
+    <button class="btn btn-orange" onclick="saveData()">💾 ذخیره</button>
+    <button class="btn btn-gray" onclick="window.print()">🖨️ چاپ</button>
+    <button class="btn btn-gray" onclick="showToast('تنظیمات در نسخه‌های بعدی فعال می‌شود','error')">⚙️ تنظیمات</button>
+    <button class="btn btn-red" onclick="resetAll()">🗑️ خروج / پاک‌سازی</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-icon icon-total">👥</div>
+      <div><div class="num" id="statTotal">0</div><div class="label">تعداد کل پرسنل</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-present">✅</div>
+      <div><div class="num" id="statPresent">0</div><div class="label">حاضر</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-absent">❌</div>
+      <div><div class="num" id="statAbsent">0</div><div class="label">غایب</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-late">⏰</div>
+      <div><div class="num" id="statLate">0</div><div class="label">تاخیر</div></div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card cal-card">
+      <div class="card-header">
+        <h2>📅 تقویم</h2>
+        <div class="cal-nav">
+          <button onclick="changeMonth(1)">›</button>
+          <span class="cal-title" id="calTitle"></span>
+          <button onclick="changeMonth(-1)">‹</button>
+        </div>
+      </div>
+      <div class="calendar">
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>📋 لیست تردد روز</h2>
+        <div class="search-box"><input type="text" id="searchInput" placeholder="جستجوی نام یا کد پرسنلی..." oninput="renderTable()"></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>نام و نام خانوادگی</th>
+              <th>کد پرسنلی</th>
+              <th>واحد</th>
+              <th>وضعیت</th>
+              <th>ورود</th>
+              <th>خروج</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">ثبت تردد جدید</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>نام و نام خانوادگی</label>
+        <input type="text" id="fName" placeholder="مثلاً: علی محمدی">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>کد پرسنلی</label>
+          <input type="text" id="fCode" placeholder="1001">
+        </div>
+        <div class="field">
+          <label>واحد سازمانی</label>
+          <input type="text" id="fUnit" placeholder="مالی">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>وضعیت</label>
+          <select id="fStatus">
+            <option value="present">حاضر</option>
+            <option value="late">تاخیر</option>
+            <option value="absent">غایب</option>
+            <option value="leave">مرخصی</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>ساعت ورود</label>
+          <input type="time" id="fIn">
+        </div>
+      </div>
+      <div class="field">
+        <label>ساعت خروج</label>
+        <input type="time" id="fOut">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="saveRecord()">✔️ تایید</button>
+      <button class="btn btn-gray" onclick="closeModal()">✖ انصراف</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'rahkaran_attendance_v4';
+const WEEKDAYS = ['ش','ی','د','س','چ','پ','ج'];
+const JMONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const STATUS_FA = { present:'حاضر', absent:'غایب', late:'تاخیر', leave:'مرخصی' };
+const STATUS_CLS = { present:'badge-present', absent:'badge-absent', late:'badge-late', leave:'badge-leave' };
+
+let records = [];
+let editingIndex = -1;
+let selectedDay = null;
+
+function div(a, b) { return ~~(a / b); }
+
+function gregToJal(gy, gm, gd) {
+  const gdm = [0,31,59,90,120,151,181,212,243,273,304,334];
+  let jy = gy <= 1600 ? 0 : 979;
+  gy -= gy <= 1600 ? 621 : 1600;
+  const gy2 = gm > 2 ? gy + 1 : gy;
+  let days = 365 * gy + div(gy2 + 3, 4) - div(gy2 + 99, 100) + div(gy2 + 399, 400) - 80 + gd + gdm[gm - 1];
+  jy += 33 * div(days, 12053);
+  days %= 12053;
+  jy += 4 * div(days, 1461);
+  days %= 1461;
+  jy += div(days - 1, 365);
+  if (days > 365) days = (days - 1) % 365;
+  const jm = days < 186 ? 1 + div(days, 31) : 7 + div(days - 186, 30);
+  const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+  return [jy, jm, jd];
+}
+
+function jalToGreg(jy, jm, jd) {
+  let gy = jy <= 979 ? 621 : 1600;
+  jy -= jy <= 979 ? 0 : 979;
+  let days = 365 * jy + div(jy, 33) * 8 + div((jy % 33) + 3, 4) + 78 + jd + (jm < 7 ? (jm - 1) * 31 : (jm - 7) * 30 + 186);
+  gy += 400 * div(days, 146097);
+  days %= 146097;
+  if (days > 36524) {
+    gy += 100 * div(--days, 36524);
+    days %= 36524;
+    if (days >= 365) days++;
+  }
+  gy += 4 * div(days, 1461);
+  days %= 1461;
+  gy += div(days - 1, 365);
+  if (days > 365) days = (days - 1) % 365;
+  let gd = days + 1;
+  const leap = (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0;
+  const md = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let gm = 0;
+  while (gm < 12 && gd > md[gm]) { gd -= md[gm]; gm++; }
+  return [gy, gm + 1, gd];
+}
+
+function jalMonthLength(jy, jm) {
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  return gregToJal(...jalToGreg(jy, 12, 30))[2] === 30 ? 30 : 29;
+}
+
+function todayJal() {
+  const n = new Date();
+  return gregToJal(n.getFullYear(), n.getMonth() + 1, n.getDate());
+}
+
+let calYear, calMonth;
+function initCalendar() {
+  const t = todayJal();
+  calYear = t[0];
+  calMonth = t[1];
+  selectedDay = t[2];
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = `${JMONTHS[calMonth - 1]} ${calYear}`;
+  const grid = document.getElementById('calGrid');
+  let html = WEEKDAYS.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+  const [gy, gm, gd] = jalToGreg(calYear, calMonth, 1);
+  const firstDow = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
+  const t = todayJal();
+  const len = jalMonthLength(calYear, calMonth);
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= len; d++) {
+    const classes = ['cal-day'];
+    if (calYear === t[0] && calMonth === t[1] && d === t[2]) classes.push('today');
+    if (selectedDay === d) classes.push('selected');
+    if ((firstDow + d - 1) % 7 === 6) classes.push('friday');
+    html += `<div class="${classes.join(' ')}" onclick="selectDay(${d})">${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  renderCalendar();
+}
+
+function selectDay(d) {
+  selectedDay = d;
+  renderCalendar();
+  showToast(`روز ${d} ${JMONTHS[calMonth - 1]} انتخاب شد`);
+}
+
+function tickClock() {
+  const n = new Date();
+  const p = v => String(v).padStart(2, '0');
+  document.getElementById('clockTime').textContent = `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+  const [jy, jm, jd] = gregToJal(n.getFullYear(), n.getMonth() + 1, n.getDate());
+  const faDays = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  const faDay = faDays[(n.getDay() + 1) % 7];
+  document.getElementById('clockDate').textContent = `${faDay} ${jd} ${JMONTHS[jm - 1]} ${jy}`;
+}
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    records = JSON.parse(saved);
+  } else {
+    records = [
+      { name:'علی محمدی', code:'1001', unit:'مالی', status:'present', in:'08:02', out:'17:05' },
+      { name:'زهرا کریمی', code:'1002', unit:'منابع انسانی', status:'present', in:'07:55', out:'16:58' },
+      { name:'محمد رضایی', code:'1003', unit:'فناوری اطلاعات', status:'late', in:'09:24', out:'18:00' },
+      { name:'فاطمه حسینی', code:'1004', unit:'مالی', status:'absent', in:'', out:'' },
+      { name:'حسین احمدی', code:'1005', unit:'بازرگانی', status:'leave', in:'', out:'' },
+      { name:'مریم نوری', code:'1006', unit:'فناوری اطلاعات', status:'present', in:'08:10', out:'17:12' },
+      { name:'رضا شریفی', code:'1007', unit:'پشتیبانی', status:'late', in:'09:45', out:'17:30' }
+    ];
+    saveData(true);
+  }
+}
+
+function saveData(silent) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  if (!silent) showToast('اطلاعات با موفقیت ذخیره شد');
+}
+
+function renderStats() {
+  document.getElementById('statTotal').textContent = records.length;
+  document.getElementById('statPresent').textContent = records.filter(r => r.status === 'present').length;
+  document.getElementById('statAbsent').textContent = records.filter(r => r.status === 'absent').length;
+  document.getElementById('statLate').textContent = records.filter(r => r.status === 'late').length;
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const rows = records
+    .map((r, i) => ({ ...r, i }))
+    .filter(r => !q || r.name.toLowerCase().includes(q) || String(r.code).includes(q));
+  const tbody = document.getElementById('tableBody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">رکوردی یافت نشد</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map((r, idx) => `
+      <tr>
+        <td>${idx + 1}</td>
+        <td><span class="avatar">${r.name.trim()[0] || '؟'}</span>${r.name}</td>
+        <td style="direction:ltr;text-align:right">${r.code}</td>
+        <td>${r.unit || '-'}</td>
+        <td><span class="badge ${STATUS_CLS[r.status]}">${STATUS_FA[r.status]}</span></td>
+        <td style="direction:ltr;text-align:right">${r.in || '-'}</td>
+        <td style="direction:ltr;text-align:right">${r.out || '-'}</td>
+        <td>
+          <button class="btn btn-blue btn-sm" onclick="openModal(${r.i})">ویرایش</button>
+          <button class="btn btn-red btn-sm" onclick="deleteRecord(${r.i})">حذف</button>
+        </td>
+      </tr>`).join('');
+  }
+  renderStats();
+}
+
+function openModal(index) {
+  editingIndex = index === undefined ? -1 : index;
+  document.getElementById('modalTitle').textContent = editingIndex >= 0 ? 'ویرایش تردد' : 'ثبت تردد جدید';
+  const r = editingIndex >= 0 ? records[editingIndex] : {};
+  document.getElementById('fName').value = r.name || '';
+  document.getElementById('fCode').value = r.code || '';
+  document.getElementById('fUnit').value = r.unit || '';
+  document.getElementById('fStatus').value = r.status || 'present';
+  document.getElementById('fIn').value = r.in || '';
+  document.getElementById('fOut').value = r.out || '';
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('fName').focus();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  editingIndex = -1;
+}
+
+function saveRecord() {
+  const name = document.getElementById('fName').value.trim();
+  const code = document.getElementById('fCode').value.trim();
+  if (!name || !code) {
+    showToast('نام و کد پرسنلی الزامی است', 'error');
+    return;
+  }
+  const rec = {
+    name,
+    code,
+    unit: document.getElementById('fUnit').value.trim(),
+    status: document.getElementById('fStatus').value,
+    in: document.getElementById('fIn').value,
+    out: document.getElementById('fOut').value
+  };
+  if (editingIndex >= 0) records[editingIndex] = rec;
+  else records.push(rec);
+  saveData(true);
+  renderTable();
+  closeModal();
+  showToast(editingIndex >= 0 ? 'رکورد ویرایش شد' : 'رکورد جدید ثبت شد');
+}
+
+function deleteRecord(i) {
+  if (!confirm(`حذف رکورد «${records[i].name}» تایید می‌شود؟`)) return;
+  records.splice(i, 1);
+  saveData(true);
+  renderTable();
+  showToast('رکورد حذف شد');
+}
+
+function resetAll() {
+  if (!confirm('تمام داده‌های ذخیره‌شده پاک شود؟')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  loadData();
+  renderTable();
+  showToast('داده‌ها به حالت اولیه بازگشت');
+}
+
+function exportCSV() {
+  const header = 'نام و نام خانوادگی,کد پرسنلی,واحد,وضعیت,ورود,خروج';
+  const lines = records.map(r =>
+    [r.name, r.code, r.unit, STATUS_FA[r.status], r.in, r.out].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+  );
+  const blob = new Blob(['\ufeff' + header + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'attendance.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('فایل اکسل (CSV) دانلود شد');
+}
+
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result.replace(/^\ufeff/, '');
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    let added = 0;
+    lines.slice(1).forEach(line => {
+      const cells = line.match(/("([^"]|"")*"|[^,]*)(,|$)/g)
+        ?.map(c => c.replace(/,$/, '').replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+      if (!cells || cells.length < 2 || !cells[0]) return;
+      const statusFa = cells[3] || '';
+      const status = Object.keys(STATUS_FA).find(k => STATUS_FA[k] === statusFa) || 'present';
+      records.push({ name: cells[0], code: cells[1], unit: cells[2] || '', status, in: cells[4] || '', out: cells[5] || '' });
+      added++;
+    });
+    saveData(true);
+    renderTable();
+    showToast(`${added} رکورد از فایل وارد شد`);
+    input.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'error' ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = 'toast'), 2600);
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+initCalendar();
+renderCalendar();
+loadData();
+renderTable();
+tickClock();
+setInterval(tickClock, 1000);
+</script>
+</body>
+</html>
